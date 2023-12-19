@@ -1,7 +1,7 @@
 {
     "name": "gaymemod",
     "version": "1",
-    "description": "gayimin",
+    "description": "gaymin",
     "main": "index.js",
     "scripts": {
       "start": "npm run node && node index.js"
