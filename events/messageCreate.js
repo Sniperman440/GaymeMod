@@ -11,12 +11,28 @@ client.on("messageCreate", async (message) => {
     if (message.author.id !== client.user.id &&
         message.author.bot &&
         client.config.categories.includes(message.channel.parentId) &&
-        client.config.blacklistedWords.some(word => message.content.toLowerCase().includes(word.toLowerCase())))
+        client.config.blacklistedWords.some((word) =>
+    new RegExp(
+      `\\b${word
+        .split('')
+        .join('\\s*\\W*')
+        .replace(/\s/g, '\\s*')}\\b`,
+      'gi'
+    ).test(message.content)
+  ))
         {
 
         const chnl = client.channels.cache.get("1186738350053400676") //client.channels.cache.get(client.config.channel);
-        const word = client.config.blacklistedWords.filter(word => message.content.toLowerCase().includes(word.toLowerCase()));
-        chnl.send(
+        const word = client.config.blacklistedWords.filter((word) =>
+    new RegExp(
+      `\\b${word
+        .split('')
+        .join('\\s*\\W*')
+        .replace(/\s/g, '\\s*')}\\b`,
+      'gi'
+    ).test(message.content)
+  );
+            chnl.send(
             `
             **User**: ***${message.author.username}***\n**In ${message.channel}** [(link to message)](https://discord.com/channels/${message.guildId}/${message.channel.id}/${message.id})\n**Message:**\n\`${message.content}\`\n**Triggered word(s):** \`${word.join(', ')}\`
             `
