@@ -1,6 +1,8 @@
 const { Message } = require("discord.js");
 const Gaymer = require("../handlers/Client");
 
+//mrow
+
 module.exports = {
   name: "words",
   description: `list blacklisted words`,
