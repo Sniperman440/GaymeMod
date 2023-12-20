@@ -8,29 +8,59 @@ const { PermissionFlagsBits } = require("discord.js");
 
 client.on("messageCreate", async (message) => {
 
-    if (message.author.id !== client.user.id &&
-        //message.author.bot &&
-        client.config.categories.includes(message.channel.parentId) &&
-        client.config.blacklistedWords.some((word) =>
-        new RegExp(
-            `\\b${word
-              .split('')
-              .join('\\s*[\\W_]*')
-              .replace(/\s/g, '\\s*')}\\b`,
-            'gi'
-        ).test(message.content)))
-    {
+    //automod
 
-        const chnl = client.channels.cache.get("1186738350053400676") //client.channels.cache.get(client.config.channel);
-        const word = client.config.blacklistedWords.find(word => message.content.toLowerCase().includes(word.toLowerCase()));
-
-        chnl.send(
-            `
-            **User**: ***${message.author.username}***\n**In ${message.channel}** [(link to message)](https://discord.com/channels/${message.guildId}/${message.channel.id}/${message.id})\n**Message:**\n\`${message.content}\`\n**Triggered word:** \`${word}\`
-            `
+    if (
+        message.author.id !== client.user.id &&
+        client.config.categories.includes(message.channel.parentId)
+      ) {
+        const regex = new RegExp(
+          `\\b(${client.config.blacklistedWords
+            .map(word =>
+              word
+                .split('')
+                .map(char => `[${char}${char.toUpperCase()}]`)
+                .join('[\\W_]*\\w*')
+            )
+            .join('|')})\\b`,
+          'gi'
         );
-        return;
-    };
+      
+        const foundWords = message.content.toLowerCase().match(regex);
+      
+        if (foundWords && foundWords.length > 0) {
+          const chnl = client.channels.cache.get(client.config.channel);
+          const triggeredWords = foundWords.map(word => {
+            const index = client.config.blacklistedWords.findIndex(configWord =>
+              new RegExp(
+                `\\b(${configWord
+                  .split('')
+                  .map(char => `[${char}${char.toUpperCase()}]`)
+                  .join('[\\W_]*\\w*')})\\b`,
+                'gi'
+              ).test(word)
+            );
+            return index !== -1 ? client.config.blacklistedWords[index] : word;
+          });
+      
+          chnl.send(
+            `
+            **User**: ***${message.author.username}***\n**In ${message.channel}** [(link to message)](https://discord.com/channels/${message.guildId}/${message.channel.id}/${message.id})\n**Message:**\n\`${message.content}\`\n**Triggered word(s):** \`${triggeredWords.join('\`, \`')}\`
+            `
+          );
+          return;
+        }
+    }
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
 
     //prefix
 
@@ -89,3 +119,16 @@ client.on("messageCreate", async (message) => {
 function escapeRegex(newprefix) {
     return newprefix.replace(/[.*+?^${}()|[\]\\]/g, `\\$&`);
 }
+/*
+    ⣿⣿⡟⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    ⣿⣿⢱⣶⣭⡻⢿⠿⣛⣛⣛⠸⣮⡻⣿⣿⡿⢛⣭⣶⣆⢿⣿
+    ⣿⡿⣸⣿⣿⣿⣷⣮⣭⣛⣿⣿⣿⣿⣶⣥⣾⣿⣿⣿⡷⣽⣿
+    ⣿⡏⣾⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⣿⣿
+    ⣿⣧⢻⣿⡟⣰⡿⠁⢹⣿⣿⣿⣋⣴⠖⢶⣝⢻⣿⣿⡇⣿⣿
+    ⠩⣥⣿⣿⣴⣿⣇⠀⣸⣿⣿⣿⣿⣷⠀⢰⣿⠇⣿⣭⣼⠍⣿
+    ⣿⡖⣽⣿⣿⣿⣿⣿⣿⣯⣭⣭⣿⣿⣷⣿⣿⣿⣿⣿⡔⣾⣿
+    ⣿⡡⢟⡛⠻⠿⣿⣿⣿⣝⣨⣝⣡⣿⣿⡿⠿⠿⢟⣛⣫⣼⣿
+    ⣿⣿⣿⡷⠝⢿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⡩⣼⣿⣿⣿⣿⣿
+    ⣿⣿⣯⡔⢛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣭⣍⣨⠿⢿⣿⣿⣿
+    ⣿⡿⢫⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣝⣿
+*/
